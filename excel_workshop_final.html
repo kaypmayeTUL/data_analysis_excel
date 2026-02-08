@@ -1,0 +1,1760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excel Data Analysis Workshop | Tulane University Libraries</title>
+    <style>
+        :root {
+            --tulane-green: #285C4D;
+            --tulane-green-dark: #1e4a3d;
+            --tulane-blue: #71C5E8;
+            --tulane-blue-light: #a8ddf2;
+            --storm-shutters: #00778B;
+            --medallion: #CC9900;
+            --olive-branch: #658D1B;
+            --verdigris: #71DBD4;
+            --light-bg: #f8fafb;
+            --text-dark: #2c3e50;
+            --white: #ffffff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--light-bg);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        /* Navigation */
+        .nav-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: var(--tulane-green);
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .nav-title {
+            color: var(--white);
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .nav-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .page-selector {
+            padding: 8px 12px;
+            border: 2px solid var(--tulane-blue);
+            border-radius: 6px;
+            background: var(--white);
+            color: var(--tulane-green);
+            font-size: 0.95rem;
+            cursor: pointer;
+            min-width: 280px;
+        }
+
+        .nav-btn {
+            background: var(--tulane-blue);
+            color: var(--tulane-green-dark);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover {
+            background: var(--white);
+            transform: translateY(-2px);
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .page-indicator {
+            color: var(--tulane-blue);
+            font-size: 0.9rem;
+            min-width: 80px;
+            text-align: center;
+        }
+
+        /* Main content */
+        .presentation {
+            margin-top: 70px;
+            padding: 20px;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .slide {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .slide.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Title slide */
+        .title-slide {
+            text-align: center;
+            padding: 60px 40px;
+            background: linear-gradient(135deg, var(--tulane-green) 0%, var(--storm-shutters) 100%);
+            border-radius: 16px;
+            color: var(--white);
+            min-height: calc(100vh - 130px);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .title-slide h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .title-slide .subtitle {
+            font-size: 1.5rem;
+            color: var(--tulane-blue-light);
+            margin-bottom: 40px;
+        }
+
+        .title-slide .presenter {
+            font-size: 1.3rem;
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 2px solid var(--tulane-blue);
+            display: inline-block;
+        }
+
+        .title-slide .institution {
+            font-size: 1.1rem;
+            color: var(--tulane-blue-light);
+            margin-top: 10px;
+        }
+
+        /* Content slides */
+        .content-slide {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 45px 50px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            min-height: calc(100vh - 130px);
+        }
+
+        .content-slide h2 {
+            color: var(--tulane-green);
+            font-size: 2.1rem;
+            margin-bottom: 35px;
+            padding-bottom: 18px;
+            border-bottom: 3px solid var(--tulane-blue);
+            line-height: 1.3;
+        }
+
+        .content-slide h3 {
+            color: var(--storm-shutters);
+            font-size: 1.45rem;
+            margin: 35px 0 20px 0;
+            line-height: 1.4;
+        }
+
+        .content-slide h4 {
+            color: var(--tulane-green);
+            font-size: 1.2rem;
+            margin: 25px 0 15px 0;
+            line-height: 1.4;
+        }
+
+        .content-slide p {
+            margin-bottom: 18px;
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+
+        .content-slide ul, .content-slide ol {
+            margin: 20px 0 20px 30px;
+        }
+
+        .content-slide li {
+            margin-bottom: 14px;
+            font-size: 1.1rem;
+            line-height: 1.7;
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, #e8f5f1 0%, #e1f4fb 100%);
+            border-left: 6px solid var(--tulane-green);
+            padding: 30px 35px;
+            margin: 35px 0;
+            border-radius: 0 12px 12px 0;
+            line-height: 1.8;
+        }
+
+        .highlight-box strong {
+            color: var(--tulane-green-dark);
+            font-size: 1.15rem;
+        }
+
+        .highlight-box.warning {
+            background: linear-gradient(135deg, #fef3e2 0%, #ffecd2 100%);
+            border-left-color: var(--medallion);
+        }
+
+        .highlight-box.tip {
+            background: linear-gradient(135deg, #e8f4fd 0%, #dbeafe 100%);
+            border-left-color: var(--tulane-blue);
+        }
+
+        .code-example {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 25px 30px;
+            border-radius: 12px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            margin: 25px 0;
+            font-size: 1rem;
+            line-height: 1.8;
+            white-space: pre-wrap;
+        }
+
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 35px;
+            margin: 30px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            font-size: 1rem;
+        }
+
+        th {
+            background: var(--tulane-green);
+            color: var(--white);
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        tr:nth-child(even) {
+            background: #f7fafc;
+        }
+
+        .slide-footer {
+            margin-top: 40px;
+            padding-top: 25px;
+            border-top: 2px solid var(--tulane-blue);
+            text-align: center;
+            color: #64748b;
+            font-size: 0.95rem;
+        }
+
+        .contact-card {
+            background: linear-gradient(135deg, #e8f5f1 0%, #f0f9ff 100%);
+            border-radius: 12px;
+            padding: 35px;
+            margin: 35px 0;
+            text-align: center;
+        }
+
+        .contact-card h3 {
+            color: var(--tulane-green);
+            margin-bottom: 20px;
+        }
+
+        .contact-card .name {
+            font-size: 1.35rem;
+            font-weight: 600;
+            color: var(--tulane-green-dark);
+            margin: 15px 0;
+        }
+
+        .contact-card .title {
+            font-size: 1.1rem;
+            color: #64748b;
+            margin: 10px 0;
+        }
+
+        .contact-card .email-link {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 25px;
+            background: var(--tulane-green);
+            color: var(--white);
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .contact-card .email-link:hover {
+            background: var(--storm-shutters);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        kbd {
+            background: var(--tulane-green);
+            color: var(--white);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+
+        .formula {
+            background: #f1f5f9;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-weight: 600;
+            color: var(--tulane-green-dark);
+        }
+
+        .step-number {
+            display: inline-block;
+            background: var(--tulane-blue);
+            color: var(--tulane-green-dark);
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 35px;
+            font-weight: 700;
+            margin-right: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .two-column {
+                grid-template-columns: 1fr;
+            }
+            
+            .title-slide h1 {
+                font-size: 2rem;
+            }
+            
+            .content-slide {
+                padding: 30px 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="nav-container">
+        <div class="nav-title">Excel Data Analysis Workshop</div>
+        <div class="nav-controls">
+            <select class="page-selector" id="slideSelector" onchange="jumpToSlide(this.value)">
+            </select>
+            <button class="nav-btn" id="prevBtn" onclick="changeSlide(-1)">← Previous</button>
+            <span class="page-indicator"><span id="currentSlide">1</span> / <span id="totalSlides">0</span></span>
+            <button class="nav-btn" id="nextBtn" onclick="changeSlide(1)">Next →</button>
+        </div>
+    </nav>
+
+    <div class="presentation">
+        <!-- Slide 1: Title -->
+        <section class="slide active" id="slide-0">
+            <div class="title-slide">
+                <h1>Excel Data Analysis Workshop</h1>
+                <p class="subtitle">Cleaning, Analyzing & Visualizing Data</p>
+                <div>
+                    <p class="presenter">Presented by Kay P Maye</p>
+                    <p class="institution">Howard-Tilton Memorial Library<br>Tulane University</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 2: Workshop Overview -->
+        <section class="slide" id="slide-1">
+            <div class="content-slide">
+                <h2>Workshop Overview</h2>
+                
+                <div style="margin-top: 40px;">
+                    <h3><span class="step-number">1</span> Data Cleaning</h3>
+                    <ul>
+                        <li>Identifying and handling missing values</li>
+                        <li>Finding and removing duplicates</li>
+                        <li>Standardizing data formats</li>
+                        <li>Validating data quality</li>
+                    </ul>
+                    
+                    <h3><span class="step-number">2</span> Data Analysis</h3>
+                    <ul>
+                        <li>Sorting and filtering techniques</li>
+                        <li>Using formulas for calculations</li>
+                        <li>Data Analysis ToolPak</li>
+                        <li>Creating pivot tables</li>
+                        <li>Descriptive statistics</li>
+                    </ul>
+                    
+                    <h3><span class="step-number">3</span> Data Visualization</h3>
+                    <ul>
+                        <li>Choosing the right chart type</li>
+                        <li>Creating professional visualizations</li>
+                        <li>Customizing charts effectively</li>
+                    </ul>
+                </div>
+
+                <div class="slide-footer">Kay P Maye | Tulane University Libraries</div>
+            </div>
+        </section>
+
+        <!-- Slide 3: About the Dataset -->
+        <section class="slide" id="slide-2">
+            <div class="content-slide">
+                <h2>About Our Dataset</h2>
+                
+                <p>We'll be working with a dataset containing information about 24 popular movies. This dataset has been intentionally prepared with common data quality issues you'll encounter in real-world scenarios.</p>
+                
+                <h3>Dataset Structure</h3>
+                <table>
+                    <tr>
+                        <th>Column Name</th>
+                        <th>Data Type</th>
+                        <th>Description</th>
+                    </tr>
+                    <tr>
+                        <td>Movie Title</td>
+                        <td>Text</td>
+                        <td>Name of the film</td>
+                    </tr>
+                    <tr>
+                        <td>Main Character</td>
+                        <td>Text</td>
+                        <td>Primary protagonist</td>
+                    </tr>
+                    <tr>
+                        <td>Runtime (minutes)</td>
+                        <td>Number</td>
+                        <td>Film duration</td>
+                    </tr>
+                    <tr>
+                        <td>Director</td>
+                        <td>Text</td>
+                        <td>Film director name</td>
+                    </tr>
+                    <tr>
+                        <td>First Showing Code</td>
+                        <td>Number</td>
+                        <td>Year released (encoded)</td>
+                    </tr>
+                    <tr>
+                        <td>Audience Rating</td>
+                        <td>Number</td>
+                        <td>Rating out of 10</td>
+                    </tr>
+                    <tr>
+                        <td>Budget (Millions)</td>
+                        <td>Number</td>
+                        <td>Production budget in millions USD</td>
+                    </tr>
+                    <tr>
+                        <td>Box Office (Millions)</td>
+                        <td>Number</td>
+                        <td>Total box office revenue in millions USD</td>
+                    </tr>
+                    <tr>
+                        <td>Genre</td>
+                        <td>Text</td>
+                        <td>Primary film genre</td>
+                    </tr>
+                    <tr>
+                        <td>Description</td>
+                        <td>Text</td>
+                        <td>Brief plot summary</td>
+                    </tr>
+                </table>
+
+                <div class="slide-footer">Kay P Maye | Tulane University Libraries</div>
+            </div>
+        </section>
+
+        <!-- Slide 4: Why Clean Your Data -->
+        <section class="slide" id="slide-3">
+            <div class="content-slide">
+                <h2>Why Clean Your Data?</h2>
+                
+                <p style="font-size: 1.3em; margin-bottom: 30px;">Data cleaning is the critical first step in any analysis. Poor data quality leads to unreliable insights and incorrect conclusions.</p>
+                
+                <div class="two-column">
+                    <div>
+                        <h3>Common Data Quality Issues</h3>
+                        <ul>
+                            <li><strong>Missing values:</strong> Blank cells or incomplete records</li>
+                            <li><strong>Duplicates:</strong> Repeated entries that skew analysis</li>
+                            <li><strong>Inconsistent formatting:</strong> Mixed date formats, capitalization</li>
+                            <li><strong>Invalid data:</strong> Out-of-range values, typos</li>
+                            <li><strong>Extra spaces:</strong> Leading/trailing whitespace</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3>Impact of Dirty Data</h3>
+                        <ul>
+                            <li>Incorrect calculations and statistics</li>
+                            <li>Misleading visualizations</li>
+                            <li>Failed data imports/exports</li>
+                            <li>Wasted time troubleshooting</li>
+                            <li>Loss of credibility in findings</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="highlight-box tip">
+                    <strong>Best Practice:</strong> Always work on a copy of your original data. Keep the raw data file unchanged so you can always refer back to it if needed.
+                </div>
+
+                <div class="slide-footer">Kay P Maye | Tulane University Libraries</div>
+            </div>
+        </section>
+
+        <!-- Slide 5: Finding Missing Values -->
+        <section class="slide" id="slide-4">
+            <div class="content-slide">
+                <h2>Identifying Missing Values</h2>
+                
+                <h3>Method 1: Visual Inspection with Go To Special</h3>
+                <ol>
+                    <li>Select your data range (or press <kbd>Ctrl+A</kbd> to select all)</li>
+                    <li>Press <kbd>Ctrl+G</kbd> or <kbd>F5</kbd> to open Go To dialog</li>
+                    <li>Click <strong>Special...</strong> button</li>
+                    <li>Select <strong>Blanks</strong> and click OK</li>
+                    <li>All blank cells will be highlighted</li>
+                </ol>
+                
+                <div class="highlight-box tip">
+                    <strong>Pro Tip:</strong> Once blanks are selected, you can fill them with a specific value or delete entire rows using Delete > Entire Row.
+                </div>
+                
+                <h3>Method 2: Using Filters to Find Blanks</h3>
+                <ol>
+                    <li>Click anywhere in your data table</li>
+                    <li>Go to <strong>Data</strong> tab → <strong>Filter</strong> (or press <kbd>Ctrl+Shift+L</kbd>)</li>
+                    <li>Click the dropdown arrow in the column header</li>
+                    <li>Uncheck <strong>Select All</strong></li>
+                    <li>Check only <strong>(Blanks)</strong> at the bottom of the list</li>
+                </ol>
+                
+                <h3>Our Dataset's Missing Values</h3>
+                <ul>
+                    <li><strong>Runtime:</strong> 5 missing values</li>
+                    <li><strong>Genre:</strong> 1 missing value</li>
+                    <li><strong>Description:</strong> 1 missing value</li>
+                </ul>
+
+                <div class="slide-footer">Kay P Maye | Tulane University Libraries</div>
+            </div>
+        </section>
+
+        <!-- Slide 6: Handling Missing Values -->
+        <section class="slide" id="slide-5">
+            <div class="content-slide">
+                <h2>Handling Missing Values</h2>
+                
+                <h3>Option 1: Delete Rows with Missing Data</h3>
+                <p>Best when: Missing data is minimal and random</p>
+                <ol>
+                    <li>Use Go To Special → Blanks to select empty cells</li>
+                    <li>Right-click → <strong>Delete</strong> → <strong>Entire Row</strong></li>
+                </ol>
+                
+                <div class="highlight-box warning">
+                    <strong>Warning:</strong> Only delete rows if you have enough data remaining and if the missing values don't follow a pattern that might indicate systematic issues.
+                </div>
+                
+                <h3>Option 2: Fill with Calculated Values</h3>
+                <p>For numeric data like Runtime, you can fill blanks with:</p>
+                <ul>
+                    <li><strong>Mean (average):</strong> <span class="formula">=AVERAGE(C2:C25)</span></li>
+                    <li><strong>Median:</strong> <span class="formula">=MEDIAN(C2:C25)</span></li>
+                    <li><strong>Mode (most common):</strong> <span class="formula">=MODE.SNGL(C2:C25)</span></li>
+                </ul>
+                
+                <div class="code-example"><strong>Example: Fill blanks with median runtime</strong>
+1. Calculate median in an empty cell: =MEDIAN(C2:C25)
+2. Note the result (approximately 138 minutes)
+3. Use Find & Replace: Ctrl+H
+4. Find what: leave blank | Replace with: 138
+5. Click "Options" → Match entire cell contents
+6. Replace All in the Runtime column</div>
+                
+                <h3>Option 3: Fill with Text Placeholder</h3>
+                <p>For text fields like Genre or Description:</p>
+                <ul>
+                    <li>Use "Unknown", "Not Available", or "TBD"</li>
+                    <li>Helps preserve row count for analysis</li>
+                    <li>Makes missing data explicit and searchable</li>
+                </ul>
+
+                <div class="slide-footer">Kay P Maye | Tulane University Libraries</div>
+            </div>
+        </section>
+
+        <!-- Slide 7: Finding Duplicates -->
+        <section class="slide" id="slide-6">
+            <div class="content-slide">
+                <h2>Finding & Removing Duplicates</h2>
+                
+                <h3>Method 1: Conditional Formatting (Visual)</h3>
+                <ol>
+                    <li>Select the column(s) you want to check for duplicates</li>
+                    <li>Go to <strong>Home</strong> tab → <strong>Conditional Formatting</strong></li>
+                    <li>Choose <strong>Highlight Cells Rules</strong> → <strong>Duplicate Values</strong></li>
+                    <li>Select formatting (default is light red fill) and click OK</li>
+                    <li>Duplicate values will be highlighted</li>
+                </ol>
+                
+                <div class="highlight-box tip">
+                    <strong>Pro Tip:</strong> This method doesn't delete duplicates, but it helps you identify them visually before deciding what to do.
+                </div>
+                
+                <h3>Method 2: Remove Duplicates Tool</h3>
+                <ol>
+                    <li>Click anywhere in your data table</li>
+                    <li>Go to <strong>Data</strong> tab → <strong>Remove Duplicates</strong></li>
+                    <li>Check the columns that define a duplicate:
+                        <ul>
+                            <li>For exact duplicates: select all columns</li>
+                            <li>For specific duplicates: select only key columns (e.g., Movie Title)</li>
+                        </ul>
+                    </li>
+                    <li>Check <strong>My data has headers</strong></li>
+                    <li>Click OK</li>
+                </ol>
+                
+                <div class="highlight-box warning">
+                    <strong>Important:</strong> The Remove Duplicates tool permanently deletes rows. Make sure you're working on a copy of your data, or use Undo (Ctrl+Z) immediately if you make a mistake.
+                </div>
+                
+                <h3>Method 3: Using COUNTIF to Identify Duplicates</h3>
+                <div class="code-example"><strong>Formula to count occurrences:</strong>
+=COUNTIF($A$2:$A$25, A2)
+
+This counts how many times each movie title appears in the dataset.
+If the result is > 1, it's a duplicate.</div>
+
+                <div class="slide-footer">Kay P Maye | Tulane University Libraries</div>
+            </div>
+        </section>
+
+        <!-- Slide 8: Standardizing Data -->
+        <section class="slide" id="slide-7">
+            <div class="content-slide">
+                <h2>Standardizing Data Formats</h2>
+                
+                <h3>Cleaning Text Data</h3>
+                
+                <h4>Remove Extra Spaces</h4>
+                <p>Use the TRIM function to remove leading, trailing, and extra spaces:</p>
+                <div class="code-example"><strong>Formula:</strong> =TRIM(A2)
+<strong>Example:</strong> "  The Matrix  " becomes "The Matrix"</div>
+                
+                <h4>Standardize Capitalization</h4>
+                <table>
+                    <tr>
+                        <th>Function</th>
+                        <th>Result</th>
+                        <th>Example</th>
+                    </tr>
+                    <tr>
+                        <td><span class="formula">UPPER()</span></td>
+                        <td>ALL CAPS</td>
+                        <td>THE MATRIX</td>
+                    </tr>
+                    <tr>
+                        <td><span class="formula">LOWER()</span></td>
+                        <td>all lowercase</td>
+                        <td>the matrix</td>
+                    </tr>
+                    <tr>
+                        <td><span class="formula">PROPER()</span></td>
+                        <td>Title Case</td>
+                        <td>The Matrix</td>
+                    </tr>
+                </table>
+                
+                <h3>Standardizing Number Formats</h3>
+                <ol>
+                    <li>Select the column with numbers</li>
+                    <li>Right-click → <strong>Format Cells</strong> (or <kbd>Ctrl+1</kbd>)</li>
+                    <li>Choose appropriate category:
+                        <ul>
+                            <li><strong>Number:</strong> Set decimal places (e.g., 2 for currency)</li>
+                            <li><strong>Currency:</strong> Adds $ symbol and formatting</li>
+                            <li><strong>Custom:</strong> Create your own format (e.g., "0.0" for one decimal)</li>
+                        </ul>
+                    </li>
+                </ol>
+                
+                <div class="highlight-box tip">
+                    <strong>Quick Tip:</strong> For our Budget and Box Office columns, use Number format with 1 decimal place to show values like "200.0 Millions" for consistency.
+                </div>
+
+                <div class="slide-footer">Kay P Maye | Tulane University Libraries</div>
+            </div>
+        </section>
+
+        <!-- Slide 9: Data Validation -->
+        <section class="slide" id="slide-8">
+            <div class="content-slide">
+                <h2>Data Validation</h2>
+                
+                <p>Data validation helps ensure that only appropriate values are entered into your cells.</p>
+                
+                <h3>Setting Up Data Validation</h3>
+                <ol>
+                    <li>Select the cell(s) where you want validation</li>
+                    <li>Go to <strong>Data</strong> tab → <strong>Data Validation</strong></li>
+                    <li>Choose validation criteria from the dropdown</li>
+                    <li>Set parameters and optional error messages</li>
+                </ol>
+                
+                <h3>Common Validation Rules</h3>
+                
+                <h4>1. Whole Numbers (for Runtime)</h4>
+                <div class="code-example"><strong>Settings:</strong>
+Allow: Whole number
+Data: between
+Minimum: 60
+Maximum: 250
+
+This ensures runtime is a realistic number between 1-4 hours.</div>
+                
+                <h4>2. Decimal Numbers (for Ratings)</h4>
+                <div class="code-example"><strong>Settings:</strong>
+Allow: Decimal
+Data: between
+Minimum: 0
+Maximum: 10
+
+Ensures ratings stay within the 0-10 scale.</div>
+                
+                <h4>3. List (for Genre)</h4>
+                <div class="code-example"><strong>Settings:</strong>
+Allow: List
+Source: Sci-Fi, Drama, Fantasy, Action, Romance, Crime, Adventure
+
+Creates a dropdown menu with only valid genre options.</div>
+                
+                <div class="highlight-box tip">
+                    <strong>Pro Tip:</strong> Add an input message and error alert to guide users on what values are acceptable. This makes your spreadsheet more user-friendly.
+                </div>
+
+                <div class="slide-footer">Kay P Maye | Tulane University Libraries</div>
+            </div>
+        </section>
+
+        <!-- Slide 10: Analysis Introduction -->
+        <section class="slide" id="slide-9">
+            <div class="content-slide">
+                <h2>From Clean Data to Insights</h2>
+                
+                <p style="font-size: 1.3em; margin-bottom: 30px;">Now that our data is clean, we can perform reliable analysis to answer questions and discover patterns.</p>
+                
+                <div class="two-column">
+                    <div>
+                        <h3>Questions We Can Answer</h3>
+                        <ul>
+                            <li>Which movies were the most profitable?</li>
+                            <li>What's the average runtime by genre?</li>
+                            <li>Which directors have the most films in our dataset?</li>
+                            <li>Is there a relationship between budget and box office revenue?</li>
+                            <li>What are the top-rated movies?</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3>Key Excel Analysis Tools</h3>
+                        <ul>
+                            <li><strong>Sorting & Filtering:</strong> Organize and view specific subsets</li>
+                            <li><strong>Formulas:</strong> Calculate new metrics from existing data</li>
+                            <li><strong>Data Analysis ToolPak:</strong> Advanced statistical analysis</li>
+                            <li><strong>Pivot Tables:</strong> Summarize and aggregate data</li>
+                            <li><strong>Statistical Functions:</strong> Describe your data mathematically</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="slide-footer">Kay P Maye | Tulane University Libraries</div>
+            </div>
+        </section>
+
+        <!-- Slide 11: Sorting and Filtering -->
+        <section class="slide" id="slide-10">
+            <div class="content-slide">
+                <h2>Sorting & Filtering Data</h2>
+                
+                <h3>Sorting Data</h3>
+                <p>Sorting arranges your data in a specific order (ascending/descending).</p>
+                
+                <h4>Quick Sort (Single Column)</h4>
+                <ol>
+                    <li>Click any cell in the column you want to sort</li>
+                    <li>Go to <strong>Data</strong> tab</li>
+                    <li>Click <strong>A→Z</strong> (ascending) or <strong>Z→A</strong> (descending)</li>
+                </ol>
+                
+                <h4>Custom Sort (Multiple Columns)</h4>
+                <ol>
+                    <li>Click anywhere in your data table</li>
+                    <li>Go to <strong>Data</strong> tab → <strong>Sort</strong></li>
+                    <li>Add sort levels:
+                        <ul>
+                            <li>Sort by: Genre (A to Z)</li>
+                            <li>Then by: Box Office (Largest to Smallest)</li>
+                        </ul>
+                    </li>
+                    <li>Click OK</li>
+                </ol>
+                
+                <div class="highlight-box tip">
+                    <strong>Pro Tip:</strong> Always ensure "My data has headers" is checked so Excel doesn't sort your header row with the data.
+                </div>
+                
+                <h3>Filtering Data</h3>
+                <p>Filtering displays only rows that meet certain criteria.</p>
+                
+                <h4>Apply AutoFilter</h4>
+                <ol>
+                    <li>Click anywhere in your data</li>
+                    <li>Press <kbd>Ctrl+Shift+L</kbd> or go to Data → Filter</li>
+                    <li>Click dropdown arrows in headers to set filter criteria</li>
+                </ol>
+                
+                <h4>Example Filters</h4>
+                <ul>
+                    <li><strong>Genre = "Sci-Fi":</strong> Show only science fiction movies</li>
+                    <li><strong>Box Office > 1000:</strong> Show only billion-dollar movies</li>
+                    <li><strong>Rating ≥ 8.5:</strong> Show only highly-rated films</li>
+                    <li><strong>Director = "Christopher Nolan":</strong> Show specific director's films</li>
+                </ul>
+
+                <div class="slide-footer">Kay P Maye | Tulane University Libraries</div>
+            </div>
+        </section>
+
+        <!-- Slide 12: Formulas and Calculations -->
+        <section class="slide" id="slide-11">
+            <div class="content-slide">
+                <h2>Using Formulas for Analysis</h2>
+                
+                <h3>Essential Statistical Formulas</h3>
+                
+                <p>Excel provides built-in functions for common statistical calculations that help you understand your data.</p>
+                
+                <table>
+                    <tr>
+                        <th>Function</th>
+                        <th>Purpose</th>
+                        <th>Example</th>
+                    </tr>
+                    <tr>
+                        <td><span class="formula">AVERAGE()</span></td>
+                        <td>Mean value</td>
+                        <td>=AVERAGE(H2:H25)</td>
+                    </tr>
+                    <tr>
+                        <td><span class="formula">MEDIAN()</span></td>
+                        <td>Middle value</td>
+                        <td>=MEDIAN(H2:H25)</td>
+                    </tr>
+                    <tr>
+                        <td><span class="formula">MODE.SNGL()</span></td>
+                        <td>Most common value</td>
+                        <td>=MODE.SNGL(F2:F25)</td>
+                    </tr>
+                    <tr>
+                        <td><span class="formula">MAX()</span></td>
+                        <td>Largest value</td>
+                        <td>=MAX(H2:H25)</td>
+                    </tr>
+                    <tr>
+                        <td><span class="formula">MIN()</span></td>
+                        <td>Smallest value</td>
+                        <td>=MIN(H2:H25)</td>
+                    </tr>
+                    <tr>
+                        <td><span class="formula">COUNT()</span></td>
+                        <td>Count numeric values</td>
+                        <td>=COUNT(H2:H25)</td>
+                    </tr>
+                    <tr>
+                        <td><span class="formula">COUNTA()</span></td>
+                        <td>Count non-empty cells</td>
+                        <td>=COUNTA(A2:A25)</td>
+                    </tr>
+                    <tr>
+                        <td><span class="formula">STDEV.S()</span></td>
+                        <td>Standard deviation</td>
+                        <td>=STDEV.S(H2:H25)</td>
+                    </tr>
+                </table>
+                
+                <h3>Creating Calculated Columns</h3>
+                <p>You can create new columns that combine or transform existing data:</p>
+                
+                <div class="code-example"><strong>Example: Calculate Profit</strong>
+=H2-G2
+
+Subtracts Budget from Box Office to show profit in millions</div>
+                
+                <div class="highlight-box tip">
+                    <strong>Pro Tip:</strong> After entering a formula in the first row, double-click the fill handle (small square at the bottom-right corner of the cell) to automatically copy the formula down the entire column.
+                </div>
+
+                <div class="slide-footer">Kay P Maye | Tulane University Libraries</div>
+            </div>
+        </section>
+
+        <!-- Slide 13: Conditional Formulas -->
+        <section class="slide" id="slide-12">
+            <div class="content-slide">
+                <h2>Conditional Formulas</h2>
+                
+                <h3>Basic IF Function</h3>
+                <p>The IF function performs different calculations based on whether a condition is true or false.</p>
+                
+                <div class="code-example"><strong>Syntax:</strong> =IF(logical_test, value_if_true, value_if_false)
+
+<strong>Example: Categorize by Rating</strong>
+=IF(F2>=8, "Excellent", "Good")
+
+If rating ≥ 8, show "Excellent", otherwise show "Good"</div>
+                
+                <h3>Nested IF for Multiple Categories</h3>
+                <p>Create a performance category based on Box Office revenue:</p>
+                
+                <div class="code-example"><strong>Formula:</strong>
+=IF(H2>=1000, "Blockbuster", IF(H2>=500, "Hit", IF(H2>=200, "Moderate", "Low")))
+
+<strong>Categories:</strong>
+• Blockbuster: ≥ $1,000M
+• Hit: $500M - $999M
+• Moderate: $200M - $499M
+• Low: < $200M</div>
+                
+                <h3>COUNTIF and SUMIF</h3>
+                <p>Count or sum values that meet specific criteria:</p>
+                
+                <table>
+                    <tr>
+                        <th>Formula</th>
+                        <th>Purpose</th>
+                        <th>Example</th>
+                    </tr>
+                    <tr>
+                        <td><span class="formula">COUNTIF()</span></td>
+                        <td>Count cells matching criteria</td>
+                        <td>=COUNTIF(I2:I25,"Sci-Fi")</td>
+                    </tr>
+                    <tr>
+                        <td><span class="formula">SUMIF()</span></td>
+                        <td>Sum cells matching criteria</td>
+                        <td>=SUMIF(I2:I25,"Sci-Fi",H2:H25)</td>
+                    </tr>
+                    <tr>
+                        <td><span class="formula">AVERAGEIF()</span></td>
+                        <td>Average cells matching criteria</td>
+                        <td>=AVERAGEIF(I2:I25,"Sci-Fi",F2:F25)</td>
+                    </tr>
+                </table>
+                
+                <div class="highlight-box tip">
+                    <strong>Try it:</strong> Use COUNTIF to count how many movies are in each genre, or AVERAGEIF to find the average rating for each genre.
+                </div>
+
+                <div class="slide-footer">Kay P Maye | Tulane University Libraries</div>
+            </div>
+        </section>
+
+        <!-- Slide 14: Data Analysis ToolPak -->
+        <section class="slide" id="slide-13">
+            <div class="content-slide">
+                <h2>Data Analysis ToolPak</h2>
+                
+                <p>The Data Analysis ToolPak is a free Excel add-in that provides advanced statistical and engineering analysis tools.</p>
+                
+                <h3>Enabling the Data Analysis ToolPak</h3>
+                <ol>
+                    <li>Go to <strong>File</strong> → <strong>Options</strong></li>
+                    <li>Click <strong>Add-ins</strong> in the left sidebar</li>
+                    <li>At the bottom, select <strong>Excel Add-ins</strong> from the dropdown</li>
+                    <li>Click <strong>Go...</strong></li>
+                    <li>Check the box for <strong>Analysis ToolPak</strong></li>
+                    <li>Click OK</li>
+                    <li>The tools will now appear in <strong>Data</strong> tab → <strong>Data Analysis</strong></li>
+                </ol>
+                
+                <div class="highlight-box tip">
+                    <strong>Note:</strong> Once enabled, the Data Analysis button appears on the Data tab in the Analysis group. You only need to enable it once per Excel installation.
+                </div>
+                
+                <h3>Available Analysis Tools</h3>
+                <div class="two-column">
+                    <div>
+                        <h4>Descriptive Statistics</h4>
+                        <ul>
+                            <li>Mean, median, mode</li>
+                            <li>Standard deviation & variance</li>
+                            <li>Range, min, max</li>
+                            <li>Confidence intervals</li>
+                            <li>Kurtosis & skewness</li>
+                        </ul>
+                        
+                        <h4>Data Distribution</h4>
+                        <ul>
+                            <li>Histogram generation</li>
+                            <li>Frequency distributions</li>
+                            <li>Rank and percentile</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4>Correlation & Regression</h4>
+                        <ul>
+                            <li>Correlation matrices</li>
+                            <li>Simple linear regression</li>
+                            <li>Multiple regression</li>
+                        </ul>
+                        
+                        <h4>Statistical Tests</h4>
+                        <ul>
+                            <li>t-Tests (paired, two-sample)</li>
+                            <li>ANOVA (single & two-factor)</li>
+                            <li>F-Test</li>
+                            <li>z-Test</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="slide-footer">Kay P Maye | Tulane University Libraries</div>
+            </div>
+        </section>
+
+        <!-- Slide 15: Using Data Analysis ToolPak -->
+        <section class="slide" id="slide-14">
+            <div class="content-slide">
+                <h2>Using the Data Analysis ToolPak</h2>
+                
+                <p>Let's generate comprehensive statistics for the Box Office revenue data.</p>
+                
+                <h3>Step-by-Step Process</h3>
+                <ol>
+                    <li>Ensure your data is clean and organized in columns</li>
+                    <li>Go to <strong>Data</strong> tab → <strong>Data Analysis</strong></li>
+                    <li>Select <strong>Descriptive Statistics</strong> from the list</li>
+                    <li>Click OK</li>
+                </ol>
+                
+                <h3>Configure the Analysis</h3>
+                <div class="code-example"><strong>Input Range:</strong> Select your data column (e.g., H2:H25 for Box Office)
+<strong>Grouped By:</strong> Columns
+<strong>Labels in First Row:</strong> Check if your range includes the header
+<strong>Output Options:</strong> Choose where to place results
+- New Worksheet Ply (recommended for separate analysis)
+- Output Range (specify a cell location)
+<strong>Additional Options:</strong>
+✓ Summary statistics
+✓ Confidence Level for Mean (default 95%)
+✓ Kth Largest (optional)
+✓ Kth Smallest (optional)</div>
+                
+                <h3>Interpreting Results</h3>
+                <p>The output includes:</p>
+                <ul>
+                    <li><strong>Mean:</strong> Average value</li>
+                    <li><strong>Standard Error:</strong> Estimate of sampling error</li>
+                    <li><strong>Median:</strong> Middle value (50th percentile)</li>
+                    <li><strong>Standard Deviation:</strong> Measure of data spread</li>
+                    <li><strong>Variance:</strong> Square of standard deviation</li>
+                    <li><strong>Kurtosis:</strong> Measure of distribution "tailedness"</li>
+                    <li><strong>Skewness:</strong> Measure of distribution asymmetry</li>
+                    <li><strong>Range:</strong> Difference between max and min</li>
+                    <li><strong>Count:</strong> Number of data points</li>
+                </ul>
+                
+                <div class="highlight-box tip">
+                    <strong>Pro Tip:</strong> The Descriptive Statistics tool is especially useful when you need a comprehensive statistical summary for reports or publications. It's faster than calculating each statistic individually.
+                </div>
+
+                <div class="slide-footer">Kay P Maye | Tulane University Libraries</div>
+            </div>
+        </section>
+
+        <!-- Slide 16: More ToolPak Examples -->
+        <section class="slide" id="slide-15">
+            <div class="content-slide">
+                <h2>Additional ToolPak Applications</h2>
+                
+                <h3>Creating a Histogram</h3>
+                <p>Automatically generate a histogram to visualize data distribution:</p>
+                <ol>
+                    <li>Data → Data Analysis → <strong>Histogram</strong></li>
+                    <li>Select your <strong>Input Range</strong> (e.g., Runtime data)</li>
+                    <li>Optionally specify <strong>Bin Range</strong> (or let Excel create bins automatically)</li>
+                    <li>Check <strong>Chart Output</strong> to create a visual histogram</li>
+                    <li>Click OK</li>
+                </ol>
+                
+                <div class="highlight-box tip">
+                    <strong>When to use:</strong> Histograms help you understand the distribution of values—are most movies around 120 minutes? Are there distinct clusters?
+                </div>
+                
+                <h3>Correlation Analysis</h3>
+                <p>Examine relationships between multiple variables:</p>
+                <ol>
+                    <li>Data → Data Analysis → <strong>Correlation</strong></li>
+                    <li>Select <strong>Input Range</strong> containing multiple columns (e.g., Budget, Box Office, Rating)</li>
+                    <li>Choose output location</li>
+                    <li>Click OK</li>
+                </ol>
+                
+                <div class="code-example"><strong>Understanding Correlation Values:</strong>
++1.0 = Perfect positive correlation
+0.0 = No correlation
+-1.0 = Perfect negative correlation
+
+Values between 0.7-1.0 indicate strong relationships</div>
+                
+                <h3>When to Use Data Analysis ToolPak</h3>
+                <ul>
+                    <li><strong>Academic research:</strong> Need formal statistical analysis for papers</li>
+                    <li><strong>Quality control:</strong> Analyzing manufacturing or process data</li>
+                    <li><strong>Survey analysis:</strong> Comprehensive statistical summaries</li>
+                    <li><strong>Comparative studies:</strong> t-Tests and ANOVA for group comparisons</li>
+                    <li><strong>Forecasting:</strong> Regression analysis for predictions</li>
+                </ul>
+                
+                <div class="highlight-box warning">
+                    <strong>Important:</strong> ToolPak results are static—if your data changes, you must re-run the analysis. For dynamic calculations, use Excel formulas instead.
+                </div>
+
+                <div class="slide-footer">Kay P Maye | Tulane University Libraries</div>
+            </div>
+        </section>
+
+        <!-- Slide 17: Pivot Tables -->
+        <section class="slide" id="slide-16">
+            <div class="content-slide">
+                <h2>Creating Pivot Tables</h2>
+                
+                <p>Pivot tables are Excel's most powerful analysis tool, allowing you to quickly summarize large datasets.</p>
+                
+                <h3>Creating Your First Pivot Table</h3>
+                <ol>
+                    <li>Click anywhere in your data table</li>
+                    <li>Go to <strong>Insert</strong> tab → <strong>PivotTable</strong></li>
+                    <li>Verify the data range is correct</li>
+                    <li>Choose where to place it (New Worksheet recommended)</li>
+                    <li>Click OK</li>
+                </ol>
+                
+                <h3>Building a Pivot Table: Genre Analysis</h3>
+                <p>Let's analyze average box office revenue by genre:</p>
+                
+                <div class="code-example"><strong>Pivot Table Fields:</strong>
+<strong>Rows:</strong> Drag "Genre" here
+<strong>Values:</strong> Drag "Box Office (Millions)" here
+- Click dropdown → Value Field Settings
+- Change to "Average"
+- Number format: Number with 0 decimals
+
+<strong>Result:</strong> You'll see average box office revenue for each genre</div>
+                
+                <h3>Pivot Table Ideas for Our Dataset</h3>
+                <ul>
+                    <li><strong>By Director:</strong> Count of movies and average rating per director</li>
+                    <li><strong>By Genre:</strong> Average budget and box office by genre</li>
+                    <li><strong>By Rating Category:</strong> Group ratings (0-5, 5-7, 7-10) and count movies</li>
+                    <li><strong>Budget Analysis:</strong> Create budget bins to analyze spending patterns</li>
+                </ul>
+                
+                <div class="highlight-box tip">
+                    <strong>Pro Tip:</strong> Right-click any value in the pivot table and select "Show Details" to see the underlying data that created that summary.
+                </div>
+
+                <div class="slide-footer">Kay P Maye | Tulane University Libraries</div>
+            </div>
+        </section>
+
+        <!-- Slide 18: Visualization Introduction -->
+        <section class="slide" id="slide-17">
+            <div class="content-slide">
+                <h2>Communicating Insights Visually</h2>
+                
+                <p style="font-size: 1.3em; margin-bottom: 30px;">A well-designed chart can communicate complex information at a glance and make your analysis more persuasive.</p>
+                
+                <h3>Why Visualize Data?</h3>
+                <div class="two-column">
+                    <div>
+                        <h4>Benefits</h4>
+                        <ul>
+                            <li>Quickly identify patterns and trends</li>
+                            <li>Compare values across categories</li>
+                            <li>Spot outliers and anomalies</li>
+                            <li>Make data accessible to diverse audiences</li>
+                            <li>Support decision-making with evidence</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4>Best Practices</h4>
+                        <ul>
+                            <li>Choose the right chart type for your data</li>
+                            <li>Keep it simple and focused</li>
+                            <li>Use clear labels and titles</li>
+                            <li>Apply consistent color schemes</li>
+                            <li>Avoid chart junk (unnecessary elements)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="slide-footer">Kay P Maye | Tulane University Libraries</div>
+            </div>
+        </section>
+
+        <!-- Slide 19: Choosing Chart Types -->
+        <section class="slide" id="slide-18">
+            <div class="content-slide">
+                <h2>Choosing the Right Chart Type</h2>
+                
+                <table>
+                    <tr>
+                        <th>Chart Type</th>
+                        <th>Best Used For</th>
+                        <th>Our Dataset Example</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Column/Bar Chart</strong></td>
+                        <td>Comparing values across categories</td>
+                        <td>Box office revenue by genre</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Line Chart</strong></td>
+                        <td>Showing trends over time</td>
+                        <td>Average budget over release years</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Pie Chart</strong></td>
+                        <td>Showing parts of a whole (use sparingly!)</td>
+                        <td>Distribution of movies by genre</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Scatter Plot</strong></td>
+                        <td>Showing relationships between two variables</td>
+                        <td>Budget vs. Box Office correlation</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Histogram</strong></td>
+                        <td>Showing distribution of values</td>
+                        <td>Distribution of movie runtimes</td>
+                    </tr>
+                </table>
+                
+                <div class="highlight-box warning">
+                    <strong>Avoid These Common Mistakes:</strong>
+                    <ul>
+                        <li>Pie charts with more than 5-7 slices (hard to compare)</li>
+                        <li>3D effects that distort data perception</li>
+                        <li>Dual-axis charts unless absolutely necessary (can be misleading)</li>
+                        <li>Too many colors or data series in one chart (visual clutter)</li>
+                    </ul>
+                </div>
+                
+                <div class="highlight-box tip">
+                    <strong>Quick Decision Guide:</strong> Ask yourself: Am I comparing categories (column/bar), showing change over time (line), examining relationships (scatter), or displaying proportions (pie)?
+                </div>
+
+                <div class="slide-footer">Kay P Maye | Tulane University Libraries</div>
+            </div>
+        </section>
+
+        <!-- Slide 20: Creating Charts -->
+        <section class="slide" id="slide-19">
+            <div class="content-slide">
+                <h2>Creating Charts in Excel</h2>
+                
+                <h3>Example: Column Chart - Top 10 Movies by Box Office</h3>
+                
+                <h4>Prepare Your Data</h4>
+                <ol>
+                    <li>Sort your data by Box Office (Largest to Smallest)</li>
+                    <li>Select the top 10 movies</li>
+                    <li>Select columns: Movie Title and Box Office (Millions)</li>
+                </ol>
+                
+                <h4>Insert the Chart</h4>
+                <ol>
+                    <li>With data selected, go to <strong>Insert</strong> tab</li>
+                    <li>Click <strong>Insert Column or Bar Chart</strong></li>
+                    <li>Choose <strong>Clustered Column</strong></li>
+                    <li>Chart appears on your worksheet</li>
+                </ol>
+                
+                <h4>Customize the Chart</h4>
+                <ol>
+                    <li><strong>Add Chart Title:</strong> Click title and type "Top 10 Highest-Grossing Movies"</li>
+                    <li><strong>Add Axis Titles:</strong>
+                        <ul>
+                            <li>Chart Design → Add Chart Element → Axis Titles</li>
+                            <li>Horizontal: "Movie Title"</li>
+                            <li>Vertical: "Box Office Revenue (Millions USD)"</li>
+                        </ul>
+                    </li>
+                    <li><strong>Format Colors:</strong>
+                        <ul>
+                            <li>Click on a column to select all</li>
+                            <li>Right-click → Format Data Series</li>
+                            <li>Choose a fill color</li>
+                        </ul>
+                    </li>
+                    <li><strong>Remove Gridlines:</strong> Chart Design → Add Chart Element → Gridlines → Primary Major Horizontal (uncheck)</li>
+                </ol>
+                
+                <div class="highlight-box tip">
+                    <strong>Pro Tip:</strong> Use data labels to show exact values on bars. Right-click bars → Add Data Labels → Format Data Labels → Show Value.
+                </div>
+
+                <div class="slide-footer">Kay P Maye | Tulane University Libraries</div>
+            </div>
+        </section>
+
+        <!-- Slide 21: Scatter Plots -->
+        <section class="slide" id="slide-20">
+            <div class="content-slide">
+                <h2>Creating Scatter Plots</h2>
+                
+                <h3>When to Use Scatter Plots</h3>
+                <p>Scatter plots are ideal for showing the relationship between two numeric variables. In our case, we want to see if there's a correlation between movie budgets and box office revenue.</p>
+                
+                <h3>Creating the Scatter Plot</h3>
+                <ol>
+                    <li>Select your data columns: Budget (Millions) and Box Office (Millions)</li>
+                    <li>Go to <strong>Insert</strong> tab → <strong>Insert Scatter (X, Y)</strong></li>
+                    <li>Choose <strong>Scatter</strong> (first option)</li>
+                    <li>Chart appears on worksheet</li>
+                </ol>
+                
+                <h3>Add a Trendline</h3>
+                <p>Trendlines help visualize the relationship between variables:</p>
+                <ol>
+                    <li>Click on any data point in the chart</li>
+                    <li>Right-click → <strong>Add Trendline</strong></li>
+                    <li>In the Format Trendline pane:
+                        <ul>
+                            <li>Select <strong>Linear</strong> (for straight-line correlation)</li>
+                            <li>Check <strong>Display Equation on chart</strong></li>
+                            <li>Check <strong>Display R-squared value on chart</strong></li>
+                        </ul>
+                    </li>
+                </ol>
+                
+                <div class="code-example"><strong>Interpreting R-squared:</strong>
+R² value ranges from 0 to 1
+• 0.7-1.0 = Strong correlation
+• 0.4-0.7 = Moderate correlation
+• 0-0.4 = Weak correlation
+
+If R² = 0.65, then 65% of box office variance is explained by budget.</div>
+                
+                <h3>Customize for Clarity</h3>
+                <ul>
+                    <li>Chart title: "Relationship Between Budget and Box Office Revenue"</li>
+                    <li>X-axis: "Budget (Millions USD)"</li>
+                    <li>Y-axis: "Box Office Revenue (Millions USD)"</li>
+                    <li>Make data points larger for visibility (Format Data Series → Marker Options)</li>
+                </ul>
+
+                <div class="slide-footer">Kay P Maye | Tulane University Libraries</div>
+            </div>
+        </section>
+
+        <!-- Slide 22: Chart Customization -->
+        <section class="slide" id="slide-21">
+            <div class="content-slide">
+                <h2>Professional Chart Formatting</h2>
+                
+                <h3>Essential Chart Elements</h3>
+                
+                <h4>1. Chart Title</h4>
+                <ul>
+                    <li>Make it descriptive and specific</li>
+                    <li>Use sentence case or title case consistently</li>
+                    <li>Bad: "Chart" | Good: "Average Box Office Revenue by Genre"</li>
+                </ul>
+                
+                <h4>2. Axis Titles and Labels</h4>
+                <ul>
+                    <li>Always include units (e.g., "Millions USD", "Minutes", "Rating (out of 10)")</li>
+                    <li>Orient text for readability</li>
+                    <li>Format numbers appropriately (no unnecessary decimals)</li>
+                </ul>
+                
+                <h4>3. Legend</h4>
+                <ul>
+                    <li>Only include if you have multiple data series</li>
+                    <li>Place where it doesn't obscure data (top or right is common)</li>
+                    <li>Use clear, descriptive series names</li>
+                </ul>
+                
+                <h4>4. Colors and Design</h4>
+                <ul>
+                    <li>Use color purposefully, not just for decoration</li>
+                    <li>Ensure sufficient contrast for accessibility</li>
+                    <li>Be consistent across charts in the same document</li>
+                    <li>Consider colorblind-friendly palettes</li>
+                </ul>
+                
+                <h3>Quick Formatting Shortcuts</h3>
+                <ul>
+                    <li><strong>Chart Styles:</strong> Chart Design → Chart Styles (pre-designed color schemes)</li>
+                    <li><strong>Quick Layout:</strong> Chart Design → Quick Layout (pre-configured element positions)</li>
+                    <li><strong>Format Pane:</strong> Click any element → <kbd>Ctrl+1</kbd> for detailed formatting options</li>
+                </ul>
+
+                <div class="slide-footer">Kay P Maye | Tulane University Libraries</div>
+            </div>
+        </section>
+
+        <!-- Slide 23: Visualization Best Practices -->
+        <section class="slide" id="slide-22">
+            <div class="content-slide">
+                <h2>Data Visualization Best Practices</h2>
+                
+                <h3>Do's</h3>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li>Start y-axis at zero for bar/column charts</li>
+                            <li>Use consistent scales for comparisons</li>
+                            <li>Label all elements clearly</li>
+                            <li>Choose appropriate chart types</li>
+                            <li>Keep designs simple and focused</li>
+                            <li>Test for accessibility (colorblind-friendly)</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <ul>
+                            <li>Use whitespace effectively</li>
+                            <li>Make text legible (size and font)</li>
+                            <li>Cite data sources</li>
+                            <li>Provide context in titles/captions</li>
+                            <li>Remove unnecessary decoration</li>
+                            <li>Consider your audience's expertise</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <h3>Don'ts</h3>
+                <ul>
+                    <li><strong>Don't truncate axes</strong> to exaggerate differences</li>
+                    <li><strong>Don't use 3D effects</strong> that distort perception</li>
+                    <li><strong>Don't use too many colors</strong> or overly similar shades</li>
+                    <li><strong>Don't clutter</strong> with unnecessary gridlines, labels, or effects</li>
+                    <li><strong>Don't use pie charts</strong> with many slices or when precise comparison matters</li>
+                    <li><strong>Don't mislead</strong> by cherry-picking data or using inappropriate scales</li>
+                </ul>
+                
+                <div class="highlight-box warning">
+                    <strong>Ethical Responsibility:</strong> Data visualizations are powerful communication tools. Always represent data honestly and avoid techniques that could mislead your audience, even unintentionally.
+                </div>
+                
+                <h3>Accessibility Checklist</h3>
+                <ul>
+                    <li>✓ Sufficient color contrast (use online contrast checkers)</li>
+                    <li>✓ Don't rely solely on color to convey information (use patterns/labels too)</li>
+                    <li>✓ Use colorblind-friendly palettes (avoid red-green combinations)</li>
+                    <li>✓ Provide alt text descriptions for charts in digital documents</li>
+                    <li>✓ Ensure text is large enough (minimum 10-12pt)</li>
+                </ul>
+
+                <div class="slide-footer">Kay P Maye | Tulane University Libraries</div>
+            </div>
+        </section>
+
+        <!-- Slide 24: Practice Exercises -->
+        <section class="slide" id="slide-23">
+            <div class="content-slide">
+                <h2>Practice Exercises</h2>
+                
+                <p>Try these exercises with the workshop dataset to reinforce your skills:</p>
+                
+                <h3>Data Cleaning Challenges</h3>
+                <ol>
+                    <li>Fill all missing Runtime values with the median runtime</li>
+                    <li>Fill missing Genre and Description with "Unknown"</li>
+                    <li>Check for and remove any duplicate movie titles</li>
+                    <li>Apply data validation to the Runtime column (60-250 minutes)</li>
+                    <li>Create a dropdown list for the Genre column</li>
+                </ol>
+                
+                <h3>Analysis Tasks</h3>
+                <ol>
+                    <li>Calculate profit (Box Office - Budget) for each movie and identify the top 5</li>
+                    <li>Find the average box office revenue for each genre</li>
+                    <li>Count how many movies each director has in the dataset</li>
+                    <li>Identify movies that cost more than $200M but made less than $500M</li>
+                    <li>Create a pivot table showing average rating by genre</li>
+                    <li>Use the Data Analysis ToolPak to generate descriptive statistics for Runtime</li>
+                </ol>
+                
+                <h3>Visualization Projects</h3>
+                <ol>
+                    <li>Create a column chart of the top 10 movies by rating</li>
+                    <li>Make a scatter plot showing Budget vs. Box Office with trendline</li>
+                    <li>Design a bar chart comparing average runtime by genre</li>
+                    <li>Create a histogram showing the distribution of movie ratings</li>
+                    <li>Make a chart showing the count of movies by genre</li>
+                </ol>
+                
+                <div class="highlight-box tip">
+                    <strong>Challenge:</strong> Combine multiple skills! Create a pivot table of average box office by genre, then create a chart from that pivot table. Add professional formatting and make it publication-ready.
+                </div>
+
+                <div class="slide-footer">Kay P Maye | Tulane University Libraries</div>
+            </div>
+        </section>
+
+        <!-- Slide 25: Additional Resources -->
+        <section class="slide" id="slide-24">
+            <div class="content-slide">
+                <h2>Additional Resources</h2>
+                
+                <h3>Excel Learning Resources</h3>
+                <ul>
+                    <li><strong>Microsoft Support:</strong> Official Excel documentation and tutorials
+                        <br>support.microsoft.com/excel
+                    </li>
+                    <li><strong>Excel Easy:</strong> Free tutorials from beginner to advanced
+                        <br>excel-easy.com
+                    </li>
+                    <li><strong>LinkedIn Learning:</strong> Video courses (free with Tulane login)
+                        <br>Search for "Excel Data Analysis" or "Excel Pivot Tables"
+                    </li>
+                </ul>
+                
+                <h3>Data Visualization Resources</h3>
+                <ul>
+                    <li><strong>Data to Viz:</strong> Chart selection guide
+                        <br>data-to-viz.com
+                    </li>
+                    <li><strong>Storytelling with Data:</strong> Blog and book by Cole Nussbaumer Knaflic
+                        <br>storytellingwithdata.com
+                    </li>
+                    <li><strong>ColorBrewer:</strong> Colorblind-safe color schemes
+                        <br>colorbrewer2.org
+                    </li>
+                </ul>
+                
+                <h3>Tulane Library Resources</h3>
+                <ul>
+                    <li><strong>Research Consultations:</strong> Schedule one-on-one help with data analysis</li>
+                    <li><strong>Workshops:</strong> Check the library website for upcoming data workshops</li>
+                    <li><strong>Online Tutorials:</strong> Access library guides on data management and analysis</li>
+                    <li><strong>Software:</strong> Access to Excel, SPSS, Stata, and more through Tulane IT</li>
+                </ul>
+                
+                <div class="highlight-box tip">
+                    <strong>Stay Connected:</strong> Follow Howard-Tilton Memorial Library on social media for workshop announcements and research tips!
+                </div>
+
+                <div class="slide-footer">Kay P Maye | Tulane University Libraries</div>
+            </div>
+        </section>
+
+        <!-- Slide 26: Key Takeaways -->
+        <section class="slide" id="slide-25">
+            <div class="content-slide">
+                <h2>Key Takeaways</h2>
+                
+                <div style="margin-top: 40px;">
+                    <h3>Data Cleaning</h3>
+                    <ul>
+                        <li>Always work on a copy of your original data</li>
+                        <li>Address missing values systematically (delete, fill, or flag)</li>
+                        <li>Check for and remove duplicates</li>
+                        <li>Standardize formats for consistency</li>
+                        <li>Use data validation to prevent future errors</li>
+                    </ul>
+                    
+                    <h3>Data Analysis</h3>
+                    <ul>
+                        <li>Start with clear research questions</li>
+                        <li>Use sorting and filtering to explore your data</li>
+                        <li>Create calculated columns for derived metrics</li>
+                        <li>Leverage pivot tables for powerful summarization</li>
+                        <li>Apply appropriate statistical functions</li>
+                        <li>Use Data Analysis ToolPak for comprehensive statistics</li>
+                    </ul>
+                    
+                    <h3>Data Visualization</h3>
+                    <ul>
+                        <li>Choose chart types that match your data story</li>
+                        <li>Keep visualizations simple and focused</li>
+                        <li>Label everything clearly with proper units</li>
+                        <li>Use color and design purposefully</li>
+                        <li>Always represent data honestly and ethically</li>
+                    </ul>
+                </div>
+                
+                <p style="font-size: 1.4em; text-align: center; margin-top: 40px; color: var(--tulane-green);">
+                    <strong>Practice makes perfect!</strong><br>
+                    The more you work with data in Excel, the more efficient and confident you'll become.
+                </p>
+
+                <div class="slide-footer">Kay P Maye | Tulane University Libraries</div>
+            </div>
+        </section>
+
+        <!-- Slide 27: Questions & Contact -->
+        <section class="slide" id="slide-26">
+            <div class="content-slide">
+                <h2>Questions & Support</h2>
+                
+                <div style="text-align: center; margin-top: 40px;">
+                    <h3 style="font-size: 2em; margin-bottom: 40px; color: var(--tulane-green);">Thank you for attending!</h3>
+                </div>
+
+                <div class="contact-card">
+                    <h3>Your Library Contact</h3>
+                    <p class="name">Kay P Maye</p>
+                    <p class="title">Librarian II<br>Howard-Tilton Memorial Library</p>
+                    <a href="mailto:kmaye@tulane.edu" class="email-link">📧 kmaye@tulane.edu</a>
+                </div>
+
+                <div class="highlight-box">
+                    <strong>Get Additional Help:</strong>
+                    <ul>
+                        <li>Schedule a research consultation for one-on-one support</li>
+                        <li>Visit library.tulane.edu for online tutorials and guides</li>
+                        <li>Check our workshop schedule for upcoming sessions</li>
+                        <li>Reach out early—don't wait until the night before your project is due!</li>
+                    </ul>
+                </div>
+
+                <div class="slide-footer">Kay P Maye | Tulane University Libraries</div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+
+        // Populate slide selector
+        const selector = document.getElementById('slideSelector');
+        const slideTitles = [
+            'Title',
+            'Workshop Overview',
+            'About the Dataset',
+            'Why Clean Your Data',
+            'Finding Missing Values',
+            'Handling Missing Values',
+            'Finding Duplicates',
+            'Standardizing Data',
+            'Data Validation',
+            'Analysis Introduction',
+            'Sorting & Filtering',
+            'Formulas & Calculations',
+            'Conditional Formulas',
+            'Data Analysis ToolPak',
+            'Using ToolPak',
+            'More ToolPak Examples',
+            'Pivot Tables',
+            'Visualization Introduction',
+            'Choosing Chart Types',
+            'Creating Charts',
+            'Scatter Plots',
+            'Chart Customization',
+            'Visualization Best Practices',
+            'Practice Exercises',
+            'Additional Resources',
+            'Key Takeaways',
+            'Questions & Contact'
+        ];
+
+        slideTitles.forEach((title, index) => {
+            const option = document.createElement('option');
+            option.value = index;
+            option.textContent = `${index + 1}. ${title}`;
+            selector.appendChild(option);
+        });
+
+        document.getElementById('totalSlides').textContent = totalSlides;
+
+        function updateSlide() {
+            slides.forEach((slide, index) => {
+                slide.classList.toggle('active', index === currentSlide);
+            });
+            
+            document.getElementById('currentSlide').textContent = currentSlide + 1;
+            document.getElementById('slideSelector').value = currentSlide;
+            
+            document.getElementById('prevBtn').disabled = currentSlide === 0;
+            document.getElementById('nextBtn').disabled = currentSlide === totalSlides - 1;
+        }
+
+        function changeSlide(direction) {
+            const newSlide = currentSlide + direction;
+            if (newSlide >= 0 && newSlide < totalSlides) {
+                currentSlide = newSlide;
+                updateSlide();
+            }
+        }
+
+        function jumpToSlide(slideIndex) {
+            currentSlide = parseInt(slideIndex);
+            updateSlide();
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+            
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                e.preventDefault();
+                changeSlide(1);
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                changeSlide(-1);
+            }
+        });
+
+        updateSlide();
+    </script>
+</body>
+</html>
